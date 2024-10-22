@@ -1,5 +1,13 @@
 import dotenv from 'dotenv';
-dotenv.config();
+const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
+
+const result = dotenv.config({ path: envFile });
+if (result.error) {
+    console.error("Error loading .env.development file:", result.error);
+    process.exit(0);
+} else {
+    console.log(".env.development file loaded successfully");
+}
 
 import { Server } from 'http';
 import express, { Application } from 'express';

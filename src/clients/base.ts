@@ -1,4 +1,4 @@
-import { NotificationPayload, NotificationResponse } from "../types";
+import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
 export abstract class NotificationClient {
     protected constructor(protected readonly config: Record<string, any>) {}

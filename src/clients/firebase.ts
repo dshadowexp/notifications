@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import { Messaging } from 'firebase-admin/lib/messaging/messaging';
 import { NotificationClient } from './base';
-import { NotificationPayload, NotificationResponse } from '../types';
+import { NotificationPayload, NotificationResponse } from '../types/notifications';
 
 interface FirebaseConfig {
     projectId: string,

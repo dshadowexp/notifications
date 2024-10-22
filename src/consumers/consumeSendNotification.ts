@@ -4,7 +4,7 @@ import { NotificationMessage } from "../types/messages";
 import { IdempotencyService } from "../services/idempotency";
 import { NotificationQueueManager } from "../queues/manager";
 import { UserDataRepository } from "../repository/userData";
-import { NotificationUserData } from "../types";
+import { NotificationUserData } from "../types/notifications";
 import { KafkaTopics } from "../config";
 
 export class SendNotificationConsumer extends KafkaConsumer {

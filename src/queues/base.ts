@@ -1,5 +1,5 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
-import { QueueJobData } from '../types';
+import { QueueJobData } from '../types/notifications';
 import { NotificationClient } from '../clients/base';
 import { DEFAULT_QUEUE_CONFIG } from './config';
 

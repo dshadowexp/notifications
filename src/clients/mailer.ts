@@ -1,6 +1,6 @@
 import { createTransport, Transporter } from "nodemailer";
 import { NotificationClient } from "./base";
-import { NotificationPayload, NotificationResponse } from "../types";
+import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
 interface GmailConfig {
     service: string, 

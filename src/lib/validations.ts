@@ -1,5 +1,5 @@
 import Joi, { ValidationResult } from 'joi';
-import { NotificationUserData } from '../types';
+import { NotificationUserData } from '../types/notifications';
 import { NotificationMessage } from '../types/messages';
 
 /**

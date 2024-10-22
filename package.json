@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "pm2 start ./dist/server.js -i max --attach --watch",
+    "start": "NODE_ENV=production pm2 start ./dist/server.js -i max --attach --watch",
     "stop": "pm2 stop all",
     "delete": "pm2 delete all",
     "build": "tsc --project tsconfig.json",
-    "dev": "nodemon --config nodemon.json",
-    "test": "jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
+    "dev": "NODE_ENV=development nodemon --config nodemon.json",
+    "test": "NODE_ENV=test jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
     "prisma:init": "npx prisma init --datasource-provider postgresql",
     "prisma:gen": "npx prisma migrate dev --name init"
   },

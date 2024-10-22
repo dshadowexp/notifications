@@ -2,7 +2,7 @@ import { Job } from 'bullmq';
 import { PushQueue } from './push';
 import { EmailQueue } from './email';
 import { SMSQueue } from './sms';
-import { QueueJobData } from '../types';
+import { QueueJobData } from '../types/notifications';
 
 export class NotificationQueueManager {
     private pushQueue?: PushQueue;
