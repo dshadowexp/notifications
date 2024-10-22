@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 
 # Build output
 dist/
@@ -25,3 +26,10 @@ coverage/
 
 # npm package files
 *.tgz
+
+# prisma migrations
+prisma/migrations
+
+# Docker files
+Dockerfile
+docker-compose.yml

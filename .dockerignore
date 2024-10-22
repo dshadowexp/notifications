@@ -13,10 +13,7 @@ yarn-error.log
 
 # Ignore environment variables files (security reasons)
 .env
-.env.local
-.env.development
-.env.test
-.env.production
+.env.*
 
 # Ignore any built output (if applicable)
 dist/
