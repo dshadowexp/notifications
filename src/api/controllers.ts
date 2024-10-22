@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { StatusCodes, ReasonPhrases } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { 
     validateSendNotificationRequest, 
     validateUpdateDeviceTokenRequest
@@ -39,11 +39,7 @@ export const sendNotification = async (req: Request, res: Response): Promise<Res
  * @returns A Promise resolving to the Response object.
  */
 export const updateDeviceToken = async (req: Request, res: Response): Promise<Response> => {
-    // Extract the user ID from the request parameters
-    const { id } = req.params;
-    if (!id) {
-        return res.status(StatusCodes.BAD_REQUEST).send({ message: ReasonPhrases.BAD_REQUEST });
-    }
+    const { uid } = req.user;
     
     // Validate the request body
     const { error, value } = validateUpdateDeviceTokenRequest(req.body);
@@ -54,7 +50,7 @@ export const updateDeviceToken = async (req: Request, res: Response): Promise<Re
 
     // Extract the whatsapp and deviceToken from the validated request body
     const { deviceToken } = value;
-    await userDataRepository.updateByUid(id, { device_token: deviceToken });
+    await userDataRepository.updateByUid(uid, { device_token: deviceToken });
 
     // Return a 200 OK response with a success message
     return res.status(StatusCodes.OK).send({ message: 'user info updated' });

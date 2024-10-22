@@ -6,7 +6,7 @@ import { verifyJWT } from "../lib/utils";
 const notificationRouter = Router();
 
 notificationRouter
-    .patch('/data/:id', authenticate(verifyJWT), asyncHandler(updateDeviceToken))
+    .patch('/device_token', authenticate(verifyJWT), asyncHandler(updateDeviceToken))
     .post('/send', authenticate(verifyJWT), authorize(['admin']), asyncHandler(sendNotification));
 
 export function initializeRoutes (app: Application) {
