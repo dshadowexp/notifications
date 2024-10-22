@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "NODE_ENV=production pm2 start ./dist/server.js -i max --attach --watch",
+    "start": "pm2 start ./dist/server.js -i max --attach --watch",
     "stop": "pm2 stop all",
     "delete": "pm2 delete all",
     "build": "tsc --project tsconfig.json",
@@ -22,6 +22,7 @@
     "@types/node": "^22.7.4",
     "@types/nodemailer": "^6.4.16",
     "@types/sinon": "^17.0.3",
+    "@types/uuid": "^10.0.0",
     "jest": "^29.7.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
@@ -34,7 +35,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",
-    "@tuller/lib": "^0.0.22",
+    "@tuller/lib": "^0.0.26",
     "bullmq": "^5.13.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

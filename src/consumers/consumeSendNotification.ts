@@ -1,13 +1,12 @@
-import { EachMessagePayload } from "kafkajs";
-import { KafkaConsumer } from "./base";
 import { NotificationMessage } from "../types/messages";
 import { IdempotencyService } from "../services/idempotency";
 import { NotificationQueueManager } from "../queues/manager";
 import { UserDataRepository } from "../repository/userData";
 import { NotificationUserData } from "../types/notifications";
 import { KafkaTopics } from "../config";
+import { KafkaMessageProcessor, ProcessorMessageData } from "@tuller/lib";
 
-export class SendNotificationConsumer extends KafkaConsumer {
+export class SendNotificationConsumer extends KafkaMessageProcessor {
     constructor(
         private readonly queueManager: NotificationQueueManager,
         private readonly idempotencyService: IdempotencyService,
@@ -27,7 +26,7 @@ export class SendNotificationConsumer extends KafkaConsumer {
         );
     }
 
-    async processMessage({ message }: EachMessagePayload): Promise<void> {
+    async processMessage({ message }: ProcessorMessageData): Promise<void> {
         try {
             const notification: NotificationMessage = JSON.parse(message.value?.toString() || '');
       

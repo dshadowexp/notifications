@@ -2,6 +2,7 @@ import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { QueueJobData } from '../types/notifications';
 import { NotificationClient } from '../clients/base';
 import { DEFAULT_QUEUE_CONFIG } from './config';
+import { logger } from '../lib/utils';
 
 export abstract class NotificationQueue {
     protected queue: Queue;
@@ -32,26 +33,28 @@ export abstract class NotificationQueue {
         );
 
         this.setupWorkerEvents();
+
+        logger.info(`${this.queueName} queue has been initialized`);
     }
 
     private setupWorkerEvents(): void {
         this.worker!
             .on('failed', (job, err) => {
-                console.log(`${this.queueName}: Job ${job} failed with error ${err.message}`);
+                logger.info(`${this.queueName}: Job ${job} failed with error ${err.message}`);
             })
             .on('error', (err) => {
-                console.log(`${this.queueName}: Worker error:`, err);
+                logger.error(`${this.queueName}: Worker error:`, err);
             })
             .on('stalled', (job) => {
-                console.log(`${this.queueName}: Job ${job} stalled`);
+                logger.info(`${this.queueName}: Job ${job} stalled`);
             });
         
         this.events
             .on('completed', ({ jobId, returnvalue }) => {
-                console.log(`Job ${jobId} has completed in ${this.queueName}\n${returnvalue}`);
+                logger.info(`Job ${jobId} has completed in ${this.queueName}\n${returnvalue}`);
             })
             .on('failed', ({ jobId, failedReason }) => {
-                console.log(`Job ${jobId} has failed in ${this.queueName}\n${failedReason}`);
+                logger.info(`Job ${jobId} has failed in ${this.queueName}\n${failedReason}`);
             });
     }
 

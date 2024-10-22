@@ -5,6 +5,8 @@ import {
     validateUpdateDeviceTokenRequest
 } from "../lib/validations";
 import { UserDataRepository } from "../repository/userData";
+import { KafkaClient, KafkaProducer } from "@tuller/lib";
+import { KafkaTopics } from "../config";
 
 const userDataRepository = new UserDataRepository();
 
@@ -23,8 +25,9 @@ export const sendNotification = async (req: Request, res: Response): Promise<Res
         return res.status(StatusCodes.BAD_REQUEST).send({ message: error.details[0].message });
     }
 
-    // Produce the message to the Kafka topic 'notifications' with the specified channel as the partition key
-    //await kafkaService.produceMessage(KafkaTopics.SEND_NOTIFICATION, value);
+    // Produce the message to the Kafka
+    const kafkaProducer = new KafkaProducer(KafkaClient.getInstance().client);
+    await kafkaProducer.sendMessage(KafkaTopics.SEND_NOTIFICATION, value);
 
     // Return a 201 Created response with a success message
     return res.status(StatusCodes.CREATED).send({ message: `notification queued` });
