@@ -16,10 +16,10 @@ datasource db {
 model UserData {
   id           String   @id @default(uuid())
   uid          String   @unique
-  name         String
-  email        String
-  phone_number String
-  device_token String
+  name         String?
+  email        String?
+  phone_number String?
+  device_token String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 }

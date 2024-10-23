@@ -9,8 +9,8 @@
     "build": "tsc --project tsconfig.json",
     "dev": "NODE_ENV=development nodemon --config nodemon.json",
     "test": "NODE_ENV=test jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
-    "prisma:init": "npx prisma init --datasource-provider postgresql",
-    "prisma:gen": "npx prisma migrate dev --name init"
+    "prisma:init": "dotenv -e .env.development -- npx prisma init --datasource-provider postgresql",
+    "prisma:gen": "dotenv -e .env.development -- npx prisma migrate dev --name init"
   },
   "keywords": [],
   "author": "Samuel Appiah-Kubi",

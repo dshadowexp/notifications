@@ -1,10 +1,12 @@
+import { KafkaTopics } from "../config";
+import { logger } from "../lib/utils";
 import { NotificationMessage } from "../types/messages";
 import { IdempotencyService } from "../services/idempotency";
 import { NotificationQueueManager } from "../queues/manager";
 import { UserDataRepository } from "../repository/userData";
 import { NotificationUserData } from "../types/notifications";
-import { KafkaTopics } from "../config";
 import { KafkaMessageProcessor, ProcessorMessageData } from "@tuller/lib";
+import { validateSendNotificationRequest } from "../lib/validations";
 
 export class SendNotificationConsumer extends KafkaMessageProcessor {
     constructor(
@@ -16,19 +18,13 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
     }
 
     validateMessage(message: NotificationMessage): boolean {
-        return !!(
-            message &&
-            message.metadata &&
-            message.metadata.messageId &&
-            message.user &&
-            message.channels &&
-            Object.keys(message.channels).length > 0
-        );
+        const { error } = validateSendNotificationRequest(message);
+        return !error;
     }
 
     async processMessage({ message }: ProcessorMessageData): Promise<void> {
         try {
-            const notification: NotificationMessage = JSON.parse(message.value?.toString() || '');
+            const notification: NotificationMessage = message;
       
             // Validate message structure and required fields
             if (!this.validateMessage(notification)) {
@@ -39,12 +35,12 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
 
             // Check if message is already being processed or has been processed
             if (await this.idempotencyService.isProcessing(messageId)) {
-                console.log(`Message ${messageId} is already being processed`);
+                logger.info(`Message ${messageId} is already being processed`);
                 return;
             }
 
             if (await this.idempotencyService.hasBeenProcessed(messageId)) {
-                console.log(`Message ${messageId} has already been processed`);
+                logger.info(`Message ${messageId} has already been processed`);
                 return;
             }
 
@@ -58,7 +54,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             );
 
             if (!started) {
-                console.log(`Failed to start processing message ${messageId}`);
+                logger.info(`Failed to start processing message ${messageId}`);
                 return;
             }
 
@@ -66,14 +62,16 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             const userNotificationData = await this.userDataRepository.findByUid(id);
 
             if (!userNotificationData) {
-                console.log(`User with id: ${id} does not exist`);
+                logger.info(`User with id: ${id} does not exist`);
                 return;
             }
 
-            await Promise.allSettled(
+            const { uid, name, email, phone_number, device_token } = userNotificationData;
+
+            await Promise.all(
                 activeChannels.map(async (channel) => {
                     try {
-                        await this.processChannel(channel, notification, userNotificationData);
+                        await this.processChannel(channel, notification, { uid, name, email, phone_number, device_token });
                         await this.idempotencyService.updateChannelStatus(
                             messageId,
                             channel,
@@ -92,7 +90,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             );
 
         } catch (error) {
-            console.error('Error processing message:', error);
+            logger.error('Error processing message:', error);
         }
     }
 

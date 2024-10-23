@@ -1,6 +1,7 @@
 import { UserData, Prisma } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { retrievePrismaClient } from "../db/postgres";
+import { NotificationUserData } from "../types/notifications";
 
 export class UserDataRepository {
     private model: Prisma.UserDataDelegate<DefaultArgs>;
@@ -15,7 +16,9 @@ export class UserDataRepository {
      * @param data - The data payload of the user data.
      * @returns A Promise that resolves to the user's information or null if not found.
      */ 
-    async create(data: UserData): Promise<UserData> {
+    async create(payload: NotificationUserData): Promise<UserData> {
+        const { uid, name, email, phone_number } = payload
+        const data = { uid, name, email, phone_number } as UserData;
         return await this.model.create({ data });
     }
 

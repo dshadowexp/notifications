@@ -1,6 +1,6 @@
 import { QUEUE_NAMES } from './config';
 import { NotificationQueue } from './base';
-import { MailerClient } from '../clients/mailer';
+import { MailerClient } from '../providers/mailer';
 
 export class EmailQueue extends NotificationQueue {
     constructor(mailerConfig: any, concurrency?: number) {

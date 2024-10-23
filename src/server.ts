@@ -12,7 +12,7 @@ if (result.error) {
 import { Server } from 'http';
 import express, { Application } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import config, { firebaseOptions, mailerOptions, twilioOptions } from './config';
+import config, { firebaseOptions, mailerOptions, redisConnectionOptions, twilioOptions } from './config';
 import { errorsMiddleware, securityMiddleware, standardMiddleware } from './api/middlewares';
 import { KafkaClient, KafkaConsumer } from '@tuller/lib';
 import { SendNotificationConsumer } from './consumers/consumeSendNotification';
@@ -109,7 +109,7 @@ async function startKafka(
  * 
  */
 async function startServer() {
-    const redis = startRedis();
+    const redis = startRedis(redisConnectionOptions);
 
     const idempotencyService = new IdempotencyService(redis);
 

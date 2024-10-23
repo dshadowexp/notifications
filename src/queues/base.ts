@@ -1,6 +1,6 @@
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
+import { Queue, Worker, Job, QueueEvents, Metrics } from 'bullmq';
 import { QueueJobData } from '../types/notifications';
-import { NotificationClient } from '../clients/base';
+import { NotificationProvider } from '../providers/base';
 import { DEFAULT_QUEUE_CONFIG } from './config';
 import { logger } from '../lib/utils';
 
@@ -8,7 +8,7 @@ export abstract class NotificationQueue {
     protected queue: Queue;
     protected events: QueueEvents;
     protected worker: Worker | undefined;
-    protected client: NotificationClient | undefined;
+    protected client: NotificationProvider | undefined;
 
     constructor(
         protected readonly queueName: string,
@@ -78,6 +78,10 @@ export abstract class NotificationQueue {
             await job.updateProgress(0);
             throw error;
         }
+    }
+
+    async metrics(type: 'completed' | 'failed', start=0, end=-1): Promise<Metrics> {
+        return await this.queue.getMetrics(type, start, end);
     }
 
     async pause(): Promise<void> {

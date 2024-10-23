@@ -1,6 +1,6 @@
 import { QUEUE_NAMES } from './config';
 import { NotificationQueue } from './base';
-import { TwilioClient } from '../clients/twilio';
+import { TwilioClient } from '../providers/twilio';
 
 export class SMSQueue extends NotificationQueue {
     constructor(smsConfig: any, concurrency?: number) {

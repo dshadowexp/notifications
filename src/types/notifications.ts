@@ -23,8 +23,8 @@ export interface QueueJobData {
 
 export interface NotificationUserData {
     uid: string;
-    name: string;
-    email: string;
-    phone_number: string;
-    device_token: string;
+    name: string | null;
+    email: string  | null;
+    phone_number: string  | null;
+    device_token: string  | null;
 }

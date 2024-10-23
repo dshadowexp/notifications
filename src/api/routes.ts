@@ -7,7 +7,7 @@ const notificationRouter = Router();
 
 notificationRouter
     .patch('/device_token', authenticate(verifyJWT), asyncHandler(updateDeviceToken))
-    .post('/send', authenticate(verifyJWT), authorize(['admin']), asyncHandler(sendNotification));
+    .post('/send', authenticate(verifyJWT), asyncHandler(sendNotification));
 
 export function initializeRoutes (app: Application) {
     app.use('/', notificationRouter);

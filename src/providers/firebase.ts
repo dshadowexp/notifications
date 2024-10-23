@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { Messaging } from 'firebase-admin/lib/messaging/messaging';
-import { NotificationClient } from './base';
+import { NotificationProvider } from './base';
 import { NotificationPayload, NotificationResponse } from '../types/notifications';
 
 interface FirebaseConfig {
@@ -9,7 +9,7 @@ interface FirebaseConfig {
     privateKey: string
 }
 
-export class FirebaseMessagingClient extends NotificationClient {
+export class FirebaseMessagingProvider extends NotificationProvider {
     private messaging: Messaging | undefined;
 
     constructor(config: FirebaseConfig) {

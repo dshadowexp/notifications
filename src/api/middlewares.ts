@@ -1,7 +1,6 @@
 import config from "../config";
 import cors from "cors";
 import { Application, json, urlencoded } from 'express';
-import { initializeRoutes } from './routes';
 import { error, notFound } from "@tuller/lib";
 
 /**

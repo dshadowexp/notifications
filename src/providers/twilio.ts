@@ -1,5 +1,5 @@
 import twilio, { Twilio } from "twilio";
-import { NotificationClient } from "./base";
+import { NotificationProvider } from "./base";
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
 interface TwilioConfig {
@@ -8,7 +8,7 @@ interface TwilioConfig {
     fromNumber: string;
 }
 
-export class TwilioClient extends NotificationClient {
+export class TwilioClient extends NotificationProvider {
     private client: Twilio | undefined;
   
     constructor(config: TwilioConfig) {

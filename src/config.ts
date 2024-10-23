@@ -46,7 +46,7 @@ class Config {
         this.MAILER_NAME = process.env.MAILER_NAME || '';
         this.FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || '';
         this.FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL || '';
-        this.FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n') || '';
+        this.FIREBASE_PRIVATE_KEY = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n') || '';
         this.TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
         this.TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
         this.TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
@@ -68,12 +68,10 @@ const config: Config = new Config();
 
 export default config;
 
-export const redisDBOptions = { 
+export const redisConnectionOptions = { 
+    port: config.REDIS_DB_PORT, // Redis port
+    host: config.REDIS_DB_URI,
     password: config.REDIS_DB_PASSWORD,
-    socket: {
-        host: config.REDIS_DB_URI,
-        port: config.REDIS_DB_PORT
-    } 
 };
 export const mailerOptions = {
     service: config.MAILER_SERVICE, 

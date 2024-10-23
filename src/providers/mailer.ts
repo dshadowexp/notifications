@@ -1,5 +1,5 @@
 import { createTransport, Transporter } from "nodemailer";
-import { NotificationClient } from "./base";
+import { NotificationProvider } from "./base";
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
 interface GmailConfig {
@@ -9,7 +9,7 @@ interface GmailConfig {
     password: string,
 }
 
-export class MailerClient extends NotificationClient {
+export class MailerClient extends NotificationProvider {
     private transporter: Transporter | undefined;
 
     constructor(config: GmailConfig) {

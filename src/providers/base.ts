@@ -1,6 +1,6 @@
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
-export abstract class NotificationClient {
+export abstract class NotificationProvider {
     protected constructor(protected readonly config: Record<string, any>) {}
   
     abstract send(payload: NotificationPayload): Promise<NotificationResponse>;

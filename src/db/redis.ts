@@ -1,10 +1,16 @@
-import Redis from "ioredis";
+import Redis, { RedisOptions } from "ioredis";
+import { logger } from "../lib/utils";
 
-export function startRedis() {
-    const redis = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-    });
+export function startRedis(configOptions: RedisOptions) {
+    const redis = new Redis(configOptions);
+
+    redis.on("connect", () => {
+        logger.info('Redis successfully connected');
+    })
+
+    redis.on("error", (error) => {
+        logger.error("Redis error connecting:", error.message);
+    })
 
     return redis;
 }
