@@ -1,4 +1,4 @@
-import { Queue, Worker, Job, QueueEvents, Metrics } from 'bullmq';
+import { Queue, Worker, Job, QueueEvents, Metrics, MetricsTime } from 'bullmq';
 import { QueueJobData } from '../types/notifications';
 import { NotificationProvider } from '../providers/base';
 import { DEFAULT_QUEUE_CONFIG } from './config';
@@ -29,6 +29,9 @@ export abstract class NotificationQueue {
             {
                 ...DEFAULT_QUEUE_CONFIG,
                 concurrency: this.concurrency,
+                metrics: {
+                    maxDataPoints: MetricsTime.ONE_WEEK * 2,
+                },
             }
         );
 
