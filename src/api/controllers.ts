@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
 import { 
     validateSendNotificationRequest, 
     validateUpdateDeviceTokenRequest
@@ -22,7 +21,7 @@ export const sendNotification = async (req: Request, res: Response): Promise<Res
     const { error, value } = validateSendNotificationRequest(req.body);
     if (error) {
         // If validation fails, return a 400 Bad Request response
-        return res.status(StatusCodes.BAD_REQUEST).send({ message: error.details[0].message });
+        return res.status(400).send({ message: error.details[0].message });
     }
 
     // Produce the message to the Kafka
@@ -30,7 +29,7 @@ export const sendNotification = async (req: Request, res: Response): Promise<Res
     await kafkaProducer.sendMessage(KafkaTopics.SEND_NOTIFICATION, value);
 
     // Return a 201 Created response with a success message
-    return res.status(StatusCodes.CREATED).send({ message: `notification queued` });
+    return res.status(201).send({ success: true, message: `notification queued` });
 }
 
 /**
@@ -48,7 +47,7 @@ export const updateDeviceToken = async (req: Request, res: Response): Promise<Re
     const { error, value } = validateUpdateDeviceTokenRequest(req.body);
     if (error) {
         // If validation fails, return a 400 Bad Request response
-        return res.status(StatusCodes.BAD_REQUEST).send({ message: error.details[0].message });
+        return res.status(400).send({ message: error.details[0].message });
     }
 
     // Extract the whatsapp and deviceToken from the validated request body
@@ -56,5 +55,5 @@ export const updateDeviceToken = async (req: Request, res: Response): Promise<Re
     await userDataRepository.updateByUid(uid, { device_token: deviceToken });
 
     // Return a 200 OK response with a success message
-    return res.status(StatusCodes.OK).send({ message: 'user info updated' });
+    return res.status(200).send({ success: true, message: 'user info updated' });
 }   

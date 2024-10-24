@@ -8,7 +8,7 @@ export abstract class NotificationQueue {
     protected queue: Queue;
     protected events: QueueEvents;
     protected worker: Worker | undefined;
-    protected client: NotificationProvider | undefined;
+    protected provider: NotificationProvider | undefined;
 
     constructor(
         protected readonly queueName: string,
@@ -18,10 +18,12 @@ export abstract class NotificationQueue {
         this.events = new QueueEvents(queueName, DEFAULT_QUEUE_CONFIG);
     }
 
-    protected abstract initializeClient(): Promise<void>;
+    private async intializeProvider(): Promise<void> {
+        await this.provider!.initialize();
+    }
 
     async initialize(): Promise<void> {
-        await this.initializeClient();
+        await this.intializeProvider();
         
         this.worker = new Worker(
             this.queueName,
@@ -70,7 +72,7 @@ export abstract class NotificationQueue {
 
     protected async processJob(job: Job<QueueJobData>): Promise<void> {
         try {
-            const result = await this.client!.send(job.data.payload);
+            const result = await this.provider!.send(job.data.payload);
             
             if (!result.success) {
                 throw new Error(result.error || 'Notification failed');
@@ -96,8 +98,8 @@ export abstract class NotificationQueue {
     }
 
     async close(): Promise<void> {
-        await this.worker!.close();
         await this.queue.close();
+        await this.worker!.close();
         await this.events!.close();
     }
 }

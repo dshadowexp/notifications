@@ -8,7 +8,7 @@ interface TwilioConfig {
     fromNumber: string;
 }
 
-export class TwilioClient extends NotificationProvider {
+export class TwilioProvider extends NotificationProvider {
     private client: Twilio | undefined;
   
     constructor(config: TwilioConfig) {

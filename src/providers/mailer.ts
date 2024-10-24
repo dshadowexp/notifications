@@ -1,33 +1,42 @@
-import { createTransport, Transporter } from "nodemailer";
 import { NotificationProvider } from "./base";
+import { createTransport, Transporter } from "nodemailer";
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
 
-interface GmailConfig {
-    service: string, 
+interface TransportConfig {
+    service?: string, 
     host: string, 
-    user: string, 
-    password: string,
+    port?: number,
+    secure?: boolean,
+    requireTLS?: boolean,
+    auth?: {
+        user: string, 
+        pass: string,
+    },
+    tls?: {
+        rejectUnauthorized: boolean
+    }
 }
 
-export class MailerClient extends NotificationProvider {
+interface SenderDetails {
+    name?: string,
+    address: string, 
+}
+
+export interface MailerConfig {
+    sender: SenderDetails,
+    transportOptions: TransportConfig,
+}
+
+export class MailerProvider extends NotificationProvider {
     private transporter: Transporter | undefined;
 
-    constructor(config: GmailConfig) {
+    constructor(config: MailerConfig) {
         super(config);
     }
 
     async initialize(): Promise<void> {
         try {
-            this.transporter = createTransport({
-                service: this.config.service, 
-                host: this.config.host, 
-                port: 465,
-                secure: true,
-                auth: {
-                    user: this.config.user, 
-                    pass: this.config.password,
-                },
-            });
+            this.transporter = createTransport(this.config.transportOptions);
         } catch (error) {
             throw new Error(`Failed to initialize Mailer client: ${error}`);
         }
@@ -35,7 +44,7 @@ export class MailerClient extends NotificationProvider {
 
     validatePayload(payload: NotificationPayload): boolean {
         if (!payload.to) return false;
-        // Add phone number validation
+        // Add email validation
         if (!payload.title) return false;
         if (!payload.body) return false;
         return true;
@@ -48,7 +57,7 @@ export class MailerClient extends NotificationProvider {
             }
 
             const mailOptions = {
-                from: this.config.email,
+                from: this.config.sender,
                 to: Array.isArray(payload.to) ? payload.to.join(',') : payload.to,
                 subject: payload.title,
                 html: payload.body,

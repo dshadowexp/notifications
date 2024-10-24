@@ -3,10 +3,10 @@ const envFile = `.env.${process.env.NODE_ENV}`;
 
 const result = dotenv.config({ path: envFile });
 if (result.error) {
-    logger.error("Error loading .env.development file:", result.error);
+    logger.error(`Error loading ${envFile} file:`, result.error);
     process.exit(0);
 } else {
-    console.log(`.env.${process.env.NODE_ENV} file loaded successfully`);
+    console.log(`${envFile} file loaded successfully`);
 }
 
 import { Server } from 'http';
@@ -24,8 +24,6 @@ import { initializeRoutes } from './api/routes';
 import { startRedis } from './db/redis';
 import { disconnectPrisma } from './db/postgres';
 import { logger } from './lib/utils';
-
-KafkaClient.getInstance().initialize(config.APP_ID, [ config.KAFKA_BROKER ]);
 
 /**
  * Initializes the Express application with security, standard, routing, and error handling middleware.
@@ -76,6 +74,8 @@ async function startKafka(
     notificationQueueManager: NotificationQueueManager,
     idempotencyService: IdempotencyService
 ) {
+    KafkaClient.getInstance().initialize(config.APP_ID, [ config.KAFKA_BROKER ]);
+    
     const consumer = new KafkaConsumer(KafkaClient.getInstance().client, `${config.APP_ID}-consumer-${uuidv4()}`);
 
     const notificationUserDataRepository = new UserDataRepository()
@@ -115,11 +115,11 @@ async function startServer() {
 
     const queueManager = await startQueueManager();
 
+    const kafkaConsumer = await startKafka(queueManager, idempotencyService);
+
     const app = startApp();
 
     startHttpServer(app);
-
-    const kafkaConsumer = await startKafka(queueManager, idempotencyService);
 
     const idempotencyCleanupTimer = setInterval(() => {
         idempotencyService.cleanup().catch(console.error);

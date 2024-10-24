@@ -3,6 +3,7 @@ import { PushQueue } from './push';
 import { EmailQueue } from './email';
 import { SMSQueue } from './sms';
 import { QueueJobData } from '../types/notifications';
+import { MailerConfig } from '../providers/mailer';
 
 export class NotificationQueueManager {
     private pushQueue?: PushQueue;
@@ -12,7 +13,7 @@ export class NotificationQueueManager {
     constructor(
         private readonly config: {
             push?: any;
-            email?: any;
+            email?: MailerConfig;
             sms?: any;
         }
     ) {}

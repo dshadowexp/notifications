@@ -5,10 +5,6 @@ import { FirebaseMessagingProvider } from '../providers/firebase';
 export class PushQueue extends NotificationQueue {
     constructor(pushConfig: any, concurrency?: number) {
         super(QUEUE_NAMES.PUSH, concurrency);
-        this.client = new FirebaseMessagingProvider(pushConfig);
-    }
-
-    protected async initializeClient(): Promise<void> {
-        await this.client!.initialize();
+        this.provider = new FirebaseMessagingProvider(pushConfig);
     }
 }

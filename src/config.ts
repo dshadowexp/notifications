@@ -74,10 +74,18 @@ export const redisConnectionOptions = {
     password: config.REDIS_DB_PASSWORD,
 };
 export const mailerOptions = {
-    service: config.MAILER_SERVICE, 
-    host: config.MAILER_HOST, 
-    user: config.MAILER_USER, 
-    password: config.MAILER_PASSWORD,
+    sender: {
+        name: config.MAILER_NAME,
+        address: config.MAILER_USER
+    },
+    transportOptions: {
+        service: config.MAILER_SERVICE, 
+        host: config.MAILER_HOST, 
+        auth: {
+            user: config.MAILER_USER, 
+            pass: config.MAILER_PASSWORD,
+        }
+    }
 };
 export const firebaseOptions = {
     projectId: config.FIREBASE_PROJECT_ID,

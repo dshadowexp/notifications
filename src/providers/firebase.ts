@@ -46,15 +46,39 @@ export class FirebaseMessagingProvider extends NotificationProvider {
                     body: payload.body,
                 },
                 data: payload.data,
-                token: Array.isArray(payload.to) ? payload.to[0] : payload.to,
+                android: {
+                    priority: 'high' as 'high' | 'normal',
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'default',
+                        },
+                    },
+                },
             };
-        
-            const response = await this.messaging!.send(message);
-            
-            return {
-                success: true,
-                messageId: response
-            };
+
+            if (Array.isArray(payload.to)) {
+                const response = await this.messaging!.sendEachForMulticast({
+                    ...message,
+                    tokens: payload.to
+                });
+
+                return {
+                    success: true,
+                    messageId: `${response.responses.map(res => res.messageId).join(',')}`
+                };
+            } else {
+                const response = await this.messaging!.send({
+                    ...message,
+                    token: payload.to
+                });
+
+                return {
+                    success: true,
+                    messageId: response
+                };
+            }
         } catch (error) {
             return this.handleError(error);
         }

@@ -1,14 +1,10 @@
 import { QUEUE_NAMES } from './config';
 import { NotificationQueue } from './base';
-import { MailerClient } from '../providers/mailer';
+import { MailerConfig, MailerProvider } from '../providers/mailer';
 
 export class EmailQueue extends NotificationQueue {
-    constructor(mailerConfig: any, concurrency?: number) {
+    constructor(mailerConfig: MailerConfig, concurrency?: number) {
         super(QUEUE_NAMES.EMAIL, concurrency);
-        this.client = new MailerClient(mailerConfig);
-    }
-
-    protected async initializeClient(): Promise<void> {
-        await this.client!.initialize();
+        this.provider = new MailerProvider(mailerConfig);
     }
 }

@@ -12,7 +12,7 @@ export function securityMiddleware(app: Application) {
     app.use(cors({ 
         origin: [config.GATEWAY_URL], 
         credentials: true, 
-        methods: ['GET', 'PUT', 'POST', 'OPTIONS'] 
+        methods: ['PUT', 'POST', 'OPTIONS'] 
     }));
 }
 
