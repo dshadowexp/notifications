@@ -25,11 +25,11 @@ export class TestUtils {
         return { smtpServer, receivedEmails };
     }
     
-    static smtpTestConfig(port: number) {
+    static smtpTestConfig(port?: 2525) {
         return {
             sender: { 
-                name: process.env.MAILER_NAME || '',
-                address: process.env.MAILER_USER || ''
+                name: 'Test User',
+                address: 'testuser@example.com'
             },
             transportOptions: {
                 host: 'localhost',

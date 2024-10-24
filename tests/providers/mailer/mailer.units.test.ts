@@ -13,10 +13,7 @@ describe('MailerProvider - Unit Tests', () => {
     let mockTransporter: any;
 
     const mockConfig = {
-        sender: { 
-            name: process.env.MAILER_NAME || '',
-            address: process.env.MAILER_USER || '' 
-        },
+        sender: TestUtils.smtpTestConfig().sender,
         transportOptions: {
             host: 'test.smtp.server',
             port: 587
@@ -120,10 +117,7 @@ describe('MailerProvider - Unit Tests', () => {
             });
 
             expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-                from: {
-                    name: process.env.MAILER_NAME,
-                    address: process.env.MAILER_USER
-                },
+                from:  TestUtils.smtpTestConfig().sender,
                 to: validPayload.to,
                 subject: validPayload.title,
                 html: validPayload.body
@@ -147,10 +141,7 @@ describe('MailerProvider - Unit Tests', () => {
                 messageId: mockMessageId
           });
           expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-                from: {
-                    name: process.env.MAILER_NAME,
-                    address: process.env.MAILER_USER
-                },
+                from:  TestUtils.smtpTestConfig().sender,
                 to: 'recipient1@example.com,recipient2@example.com',
                 subject: multipleRecipients.title,
                 html: multipleRecipients.body
