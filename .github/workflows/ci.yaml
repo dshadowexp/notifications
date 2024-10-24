@@ -15,7 +15,7 @@ jobs:
           node-version: 20
 
       - name: Install packaegs
-        run: npm install
+        run: npm ci
 
       - name: Run tests
         run: npm run test
@@ -30,6 +30,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+
+      - name: Install packaegs
+        run: npm ci
 
       - name: Build project
         run: npm run build
