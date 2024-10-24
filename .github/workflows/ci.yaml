@@ -3,8 +3,6 @@ name: Notifications Service CI
 on:
   push:
     branches: ["main"]
-  pullrequest:
-    branches: ["*"]
 
 jobs:
   test:
