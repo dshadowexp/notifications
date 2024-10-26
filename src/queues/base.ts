@@ -39,27 +39,27 @@ export abstract class NotificationQueue {
 
         this.setupWorkerEvents();
 
-        logger.info(`${this.queueName} queue has been initialized`);
+        logger().info(`${this.queueName} queue has been initialized`);
     }
 
     private setupWorkerEvents(): void {
         this.worker!
             .on('failed', (job, err) => {
-                logger.info(`${this.queueName}: Job ${job} failed with error ${err.message}`);
+                logger().info(`${this.queueName}: Job ${job} failed with error ${err.message}`);
             })
             .on('error', (err) => {
-                logger.error(`${this.queueName}: Worker error:`, err);
+                logger().error(`${this.queueName}: Worker error:`, err);
             })
             .on('stalled', (job) => {
-                logger.info(`${this.queueName}: Job ${job} stalled`);
+                logger().info(`${this.queueName}: Job ${job} stalled`);
             });
         
         this.events
             .on('completed', ({ jobId, returnvalue }) => {
-                logger.info(`Job ${jobId} has completed in ${this.queueName}\n${returnvalue}`);
+                logger().info(`Job ${jobId} has completed in ${this.queueName}\n${returnvalue}`);
             })
             .on('failed', ({ jobId, failedReason }) => {
-                logger.info(`Job ${jobId} has failed in ${this.queueName}\n${failedReason}`);
+                logger().info(`Job ${jobId} has failed in ${this.queueName}\n${failedReason}`);
             });
     }
 

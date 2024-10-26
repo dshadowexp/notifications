@@ -30,9 +30,9 @@ export class CreateNotificationUserDataConsumer extends KafkaMessageProcessor {
             }
 
             await this.userDataRepository.create(incomingUserData);
-            logger.info(`UserData with uid: ${uid} created successfully`);
+            logger().info(`UserData with uid: ${uid} created successfully`);
         } catch (error) {
-            logger.error(`CreateNotificationUserDataConsumer error`, error);
+            logger().error(`CreateNotificationUserDataConsumer error`, error);
         }
     }
 

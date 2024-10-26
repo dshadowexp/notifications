@@ -1,13 +1,5 @@
 import dotenv from 'dotenv';
-const envFile = `.env.${process.env.NODE_ENV}`;
-
-const result = dotenv.config({ path: envFile });
-if (result.error) {
-    logger.error(`Error loading ${envFile} file:`, result.error);
-    process.exit(0);
-} else {
-    console.log(`${envFile} file loaded successfully`);
-}
+dotenv.config({ path: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.env` });
 
 import { Server } from 'http';
 import express, { Application } from 'express';
@@ -46,7 +38,7 @@ function startApp() {
 function startHttpServer(app: Application) {
     const httpServer: Server = new Server(app);
     httpServer.listen(config.API_PORT, () => {
-        logger.info(`${config.APP_ID} on 127.0.0.1:${config.API_PORT} on process: ${process.pid}`);
+        logger().info(`${config.APP_ID} on 127.0.0.1:${config.API_PORT} on process: ${process.pid}`);
     });
 }
 

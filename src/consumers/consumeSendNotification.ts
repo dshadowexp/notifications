@@ -35,12 +35,12 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
 
             // Check if message is already being processed or has been processed
             if (await this.idempotencyService.isProcessing(messageId)) {
-                logger.info(`Message ${messageId} is already being processed`);
+                logger().info(`Message ${messageId} is already being processed`);
                 return;
             }
 
             if (await this.idempotencyService.hasBeenProcessed(messageId)) {
-                logger.info(`Message ${messageId} has already been processed`);
+                logger().info(`Message ${messageId} has already been processed`);
                 return;
             }
 
@@ -54,7 +54,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             );
 
             if (!started) {
-                logger.info(`Failed to start processing message ${messageId}`);
+                logger().info(`Failed to start processing message ${messageId}`);
                 return;
             }
 
@@ -62,7 +62,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             const userNotificationData = await this.userDataRepository.findByUid(id);
 
             if (!userNotificationData) {
-                logger.info(`User with id: ${id} does not exist`);
+                logger().info(`User with id: ${id} does not exist`);
                 return;
             }
 
@@ -90,7 +90,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             );
 
         } catch (error) {
-            logger.error('Error processing message:', error);
+            logger().error('Error processing message:', error);
         }
     }
 
