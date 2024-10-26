@@ -8,9 +8,9 @@ export const QUEUE_NAMES = {
 } as const;
 
 const REDIS_QUEUE_CONFIG = {
-    host: config.REDIS_QUEUE_URI,
-    port: config.REDIS_QUEUE_PORT,
-    password: config.REDIS_QUEUE_PASSWORD,
+    host: config.REDIS_URI,
+    port: config.REDIS_PORT,
+    password: config.REDIS_PASSWORD,
     maxRetriesPerRequest: null,
 }
 

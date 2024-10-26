@@ -1,5 +1,4 @@
 class Config {
-    public NODE_ENV: string;
     public APP_ID: string;
     public API_PORT: number;
     public GATEWAY_URL: string;
@@ -19,19 +18,11 @@ class Config {
     public TWILIO_AUTH_TOKEN: string;
     public TWILIO_PHONE_NUMBER: string;
     public TWILIO_WHATSAPP_NUMBER: string;
-    public REDIS_DB_URI: string;
-    public REDIS_DB_PORT: number;
-    public REDIS_DB_PASSWORD: string;
-    public REDIS_QUEUE_URI: string;
-    public REDIS_QUEUE_PORT: number;
-    public REDIS_QUEUE_PASSWORD: string;
-    public EMAILQUEUENAME: string;
-    public PUSHQUEUENAME: string;
-    public SMSQUEUENAME: string;
-    public WHATSAPPQUEUENAME: string;
+    public REDIS_URI: string;
+    public REDIS_PORT: number;
+    public REDIS_PASSWORD: string;
 
     constructor() {
-        this.NODE_ENV = process.env.NODE_ENV || '';
         this.APP_ID = process.env.APP_ID || '';
         this.API_PORT = parseInt(process.env.API_PORT || '');
         this.GATEWAY_URL = process.env.GATEWAY_URL || '';
@@ -51,16 +42,9 @@ class Config {
         this.TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
         this.TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
         this.TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER || '';
-        this.REDIS_DB_URI = process.env.REDIS_DB_URI || '';
-        this.REDIS_DB_PORT = parseInt(process.env.REDIS_DB_PORT || '');
-        this.REDIS_DB_PASSWORD = process.env.REDIS_DB_PASSWORD || '';
-        this.REDIS_QUEUE_URI = process.env.REDIS_QUEUE_URI || '';
-        this.REDIS_QUEUE_PORT = parseInt(process.env.REDIS_QUEUE_PORT || '');
-        this.REDIS_QUEUE_PASSWORD = process.env.REDIS_QUEUE_PASSWORD || '';
-        this.EMAILQUEUENAME = process.env.NOTQUEUENAME || '';
-        this.PUSHQUEUENAME = process.env.PUSHQUEUENAME || '';
-        this.SMSQUEUENAME = process.env.SMSQUEUENAME || '';
-        this.WHATSAPPQUEUENAME = process.env.WHATSAPPQUEUENAME || '';
+        this.REDIS_URI = process.env.REDIS_QUEUE_URI || '';
+        this.REDIS_PORT = parseInt(process.env.REDIS_QUEUE_PORT || '');
+        this.REDIS_PASSWORD = process.env.REDIS_QUEUE_PASSWORD || '';
     }
 }
 
@@ -69,9 +53,9 @@ const config: Config = new Config();
 export default config;
 
 export const redisConnectionOptions = { 
-    port: config.REDIS_DB_PORT, // Redis port
-    host: config.REDIS_DB_URI,
-    password: config.REDIS_DB_PASSWORD,
+    port: config.REDIS_PORT, // Redis port
+    host: config.REDIS_URI,
+    password: config.REDIS_PASSWORD,
 };
 export const mailerOptions = {
     sender: {
