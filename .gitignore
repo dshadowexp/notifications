@@ -31,5 +31,4 @@ coverage/
 prisma/migrations
 
 # Docker files
-Dockerfile
 docker-compose.yml
