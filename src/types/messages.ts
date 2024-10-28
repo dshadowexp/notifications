@@ -16,6 +16,10 @@ export interface EmailMessage {
 export interface SMSMessage {
     body: string;
 }
+
+export interface WhatsappMessage {
+    body: string;
+}
   
 export interface PushMessage {
     title: string;
@@ -34,5 +38,6 @@ export interface NotificationMessage {
         email?: EmailMessage;
         sms?: SMSMessage;
         push?: PushMessage;
+        whatsapp?: WhatsAppMessage
     };
 }

@@ -4,18 +4,21 @@ dotenv.config({ path: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : `.
 import { Server } from 'http';
 import express, { Application } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import config, { firebaseOptions, mailerOptions, redisConnectionOptions, twilioOptions } from './config';
-import { errorsMiddleware, securityMiddleware, standardMiddleware } from './api/middlewares';
+import config, { 
+    firebaseOptions, mailerOptions, redisConnectionOptions, 
+    smsTwilioOptions, whatsappTwilioOptions 
+} from './config';
+import { errorsMiddleware, securityMiddleware, standardMiddleware } from './http/middlewares';
 import { KafkaClient, KafkaConsumer } from '@tuller/lib';
 import { SendNotificationConsumer } from './consumers/consumeSendNotification';
 import { NotificationQueueManager } from './queues/manager';
 import { IdempotencyService } from './services/idempotency';
 import { UserDataRepository } from './repository/userData';
 import { CreateNotificationUserDataConsumer, UpdateNotificationUserDataConsumer } from './consumers/consumeUserData';
-import { initializeRoutes } from './api/routes';
+import { initializeRoutes } from './http/routes';
 import { startRedis } from './db/redis';
 import { disconnectPrisma } from './db/postgres';
-import { logger } from './lib/utils';
+import { logger } from './monitoring/logger';
 
 /**
  * Initializes the Express application with security, standard, routing, and error handling middleware.
@@ -50,7 +53,8 @@ async function startQueueManager() {
     const manager = new NotificationQueueManager({
         push: firebaseOptions,
         email: mailerOptions,
-        sms: twilioOptions
+        sms: smsTwilioOptions,
+        whatsapp: whatsappTwilioOptions
     });
     
     await manager.initialize();
@@ -65,9 +69,7 @@ async function startQueueManager() {
 async function startKafka(
     notificationQueueManager: NotificationQueueManager,
     idempotencyService: IdempotencyService
-) {
-    KafkaClient.getInstance().initialize(config.APP_ID, [ config.KAFKA_BROKER ]);
-    
+) { 
     const consumer = new KafkaConsumer(KafkaClient.getInstance().client, `${config.APP_ID}-consumer-${uuidv4()}`);
 
     const notificationUserDataRepository = new UserDataRepository()
@@ -103,6 +105,8 @@ async function startKafka(
 async function startServer() {
     const redis = startRedis(redisConnectionOptions);
 
+    KafkaClient.getInstance().initialize(config.APP_ID, [ config.KAFKA_BROKER ]);
+
     const idempotencyService = new IdempotencyService(redis);
 
     const queueManager = await startQueueManager();
@@ -130,4 +134,4 @@ async function startServer() {
     });
 }
 
-startServer();
+startServer().catch(console.error);

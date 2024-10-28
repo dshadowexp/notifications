@@ -2,6 +2,7 @@ import { TestUtils } from "./utils";
 import { createTransport } from "nodemailer";
 import { MailerProvider } from "../../../src/providers/mailer";
 import { NotificationPayload } from "../../../src/types/notifications";
+import { ValidationError } from "../../../src/lib/errors";
 
 // Mock nodemailer
 jest.mock('nodemailer', () => ({
@@ -56,23 +57,24 @@ describe('MailerProvider - Unit Tests', () => {
     });
 
     describe('validatePayload', () => {
-        it('should return true for valid payload', () => {
+        it('should not throw error for valid payload', () => {
             const payload: NotificationPayload = {
                 to: 'recipient@example.com',
                 title: 'Test Email',
                 body: '<p>Test content</p>'
             };
-        
-            expect(mailerProvider.validatePayload(payload)).toBe(true);
+            
+            expect(mailerProvider.validatePayload(payload)).toEqual(undefined);
         });
     
-        it('should return false when "to" is missing', () => {
+        it('should throw error when "to" is missing', () => {
             const payload = {
                 title: 'Test Email',
                 body: '<p>Test content</p>'
             } as NotificationPayload;
         
-            expect(mailerProvider.validatePayload(payload)).toBe(false);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow('\"to\" is required');
         });
     
         it('should return false when "title" is missing', () => {
@@ -81,7 +83,8 @@ describe('MailerProvider - Unit Tests', () => {
                 body: '<p>Test content</p>'
             } as NotificationPayload;
         
-            expect(mailerProvider.validatePayload(payload)).toBe(false);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow('\"title\" is required');
         });
     
         it('should return false when "body" is missing', () => {
@@ -90,7 +93,8 @@ describe('MailerProvider - Unit Tests', () => {
                 title: 'Test Email'
             } as NotificationPayload;
         
-            expect(mailerProvider.validatePayload(payload)).toBe(false);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => mailerProvider.validatePayload(payload)).toThrow('\"body\" is required');
         });
     });
 

@@ -1,18 +1,21 @@
 import twilio, { Twilio } from "twilio";
 import { NotificationProvider } from "./base";
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
+import { NotificationError, ValidationError } from "../lib/errors";
+import { validateTwilioPayload } from "../validations/providers";
 
-interface TwilioConfig {
+export interface TwilioConfig {
     accountSid: string;
     authToken: string;
-    fromNumber: string;
+    smsFromNumber?: string;
+    whatsappFromNumber?: string
 }
 
 export class TwilioProvider extends NotificationProvider {
     private client: Twilio | undefined;
   
     constructor(config: TwilioConfig) {
-      super(config);
+      super('twilio', config);
     }
   
     async initialize(): Promise<void> {
@@ -26,35 +29,32 @@ export class TwilioProvider extends NotificationProvider {
         }
     }
   
-    validatePayload(payload: NotificationPayload): boolean {
-        if (!payload.to) return false;
-        if (!payload.body) return false;
-        // Add phone number format validation if needed
-        return true;
+    validatePayload(payload: NotificationPayload) {
+        const { error } = validateTwilioPayload(payload);
+
+        if (error) {
+            throw new ValidationError(error.details[0].message);
+        }
     }
   
     async send(payload: NotificationPayload): Promise<NotificationResponse> {
         try {
-            if (!this.validatePayload(payload)) {
-                throw new Error('Invalid payload');
-            }
+            this.validatePayload(payload);
     
             const recipients = Array.isArray(payload.to) ? payload.to : [payload.to];
             const responses = await Promise.all(
-                recipients.map(to =>
-                    this.client!.messages.create({
-                        to,
-                        body: payload.body,
-                        from: this.config.fromNumber,
-                    })
-                )
+                recipients.map(to => this.client!.messages.create({
+                    to,
+                    body: payload.body,
+                    from: to.startsWith('whatsapp') ? this.config.whatsappFromNumber : this.config.smsFromNumber,
+                }))
             );
     
             return {
                 success: true,
                 messageId: responses.map(r => r.sid).join(',')
             };
-        } catch (error) {
+        } catch (error: any) {
             return this.handleError(error);
         }
     }

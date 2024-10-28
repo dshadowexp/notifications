@@ -1,9 +1,9 @@
 import { KafkaTopics } from "../config";
-import { logger } from "../lib/utils";
+import { logger } from "../monitoring/logger";
 import { UserDataRepository } from "../repository/userData";
 import { KafkaMessageProcessor, ProcessorMessageData } from "@tuller/lib";
 import { NotificationUserData } from "../types/notifications";
-import { validateCreateUserDataEvent } from "../lib/validations";
+import { validateCreateUserDataEvent } from "../validations/requests";
 
 export class CreateNotificationUserDataConsumer extends KafkaMessageProcessor {
     constructor(

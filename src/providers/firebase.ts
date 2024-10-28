@@ -2,8 +2,10 @@ import admin from 'firebase-admin';
 import { Messaging } from 'firebase-admin/lib/messaging/messaging';
 import { NotificationProvider } from './base';
 import { NotificationPayload, NotificationResponse } from '../types/notifications';
+import { ValidationError } from '../lib/errors';
+import { validateFirebasePayload } from '../validations/providers';
 
-interface FirebaseConfig {
+export interface FirebaseConfig {
     projectId: string,
     clientEmail: string,
     privateKey: string
@@ -13,7 +15,7 @@ export class FirebaseMessagingProvider extends NotificationProvider {
     private messaging: Messaging | undefined;
 
     constructor(config: FirebaseConfig) {
-        super(config);
+        super('firebase', config);
     }
 
     async initialize(): Promise<void> {
@@ -28,17 +30,17 @@ export class FirebaseMessagingProvider extends NotificationProvider {
         }
     }
 
-    validatePayload(payload: NotificationPayload): boolean {
-        if (!payload.to) return false;
-        if (!payload.body) return false;
-        return true;
+    validatePayload(payload: NotificationPayload) {
+        const { error } = validateFirebasePayload(payload);
+
+        if (error) {
+            throw new ValidationError(error.details[0].message);
+        }
     }
 
     async send(payload: NotificationPayload): Promise<NotificationResponse> {
         try {
-            if (!this.validatePayload(payload)) {
-                throw new Error('Invalid payload');
-            }
+            this.validatePayload(payload)
         
             const message = {
                 notification: {

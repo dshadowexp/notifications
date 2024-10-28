@@ -1,12 +1,13 @@
+import { logger } from "../monitoring/logger";
 import { KafkaTopics } from "../config";
-import { logger } from "../lib/utils";
 import { NotificationMessage } from "../types/messages";
 import { IdempotencyService } from "../services/idempotency";
 import { NotificationQueueManager } from "../queues/manager";
 import { UserDataRepository } from "../repository/userData";
 import { NotificationUserData } from "../types/notifications";
 import { KafkaMessageProcessor, ProcessorMessageData } from "@tuller/lib";
-import { validateSendNotificationRequest } from "../lib/validations";
+import { validateSendNotificationRequest } from "../validations/requests";
+import { ValidationError } from "../lib/errors";
 
 export class SendNotificationConsumer extends KafkaMessageProcessor {
     constructor(
@@ -17,9 +18,11 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
         super(KafkaTopics.SEND_NOTIFICATION);
     }
 
-    validateMessage(message: NotificationMessage): boolean {
+    validateMessage(message: NotificationMessage) {
         const { error } = validateSendNotificationRequest(message);
-        return !error;
+        if (error) {
+            throw new ValidationError(error.details[0].message);
+        }
     }
 
     async processMessage({ message }: ProcessorMessageData): Promise<void> {
@@ -27,9 +30,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             const notification: NotificationMessage = message;
       
             // Validate message structure and required fields
-            if (!this.validateMessage(notification)) {
-                throw new Error('Invalid message format');
-            }
+            this.validateMessage(notification);
 
             const { messageId } = notification.metadata;
 
@@ -66,12 +67,12 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 return;
             }
 
-            const { uid, name, email, phone_number, device_token } = userNotificationData;
+            const { uid, name, email, phone_number, device_token, whatsapp } = userNotificationData;
 
             await Promise.all(
                 activeChannels.map(async (channel) => {
                     try {
-                        await this.processChannel(channel, notification, { uid, name, email, phone_number, device_token });
+                        await this.processChannel(channel, notification, { uid, name, email, phone_number, device_token, whatsapp });
                         await this.idempotencyService.updateChannelStatus(
                             messageId,
                             channel,
@@ -88,7 +89,6 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                     }
                 })
             );
-
         } catch (error) {
             logger().error('Error processing message:', error);
         }
@@ -105,6 +105,9 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
         }
         if (notification.channels.push) {
             channels.push('push');
+        }
+        if (notification.channels.whatsapp) {
+            channels.push('whatsapp');
         }
     
         return channels;
@@ -125,6 +128,8 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
             case 'push':
                 await this.processPushNotification(notification, userData);
                 break;
+            case 'whatsapp':
+                await this.processWhatsappNotification(notification, userData);
         }
     }
 
@@ -171,6 +176,23 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                     title: notification.channels.push.title,
                     body: notification.channels.push.body,
                     data: notification.channels.push.data
+                },
+                metadata: {
+                    messageId: notification.metadata.messageId,
+                    userId: notification.user.id,
+                    priority: notification.metadata.priority,
+                    timestamp: Date.now()
+                }
+            })
+        }
+    }
+
+    private async processWhatsappNotification(notification: NotificationMessage, userData: NotificationUserData): Promise<void> {
+        if (notification.channels.whatsapp && userData.whatsapp) {
+            await this.queueManager.addWhatsappNotification({
+                payload: {
+                    to: userData.whatsapp,
+                    body: notification.channels.whatsapp.body,
                 },
                 metadata: {
                     messageId: notification.metadata.messageId,

@@ -20,6 +20,7 @@ model UserData {
   email        String?
   phone_number String?
   device_token String?
+  whatsapp     String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 }

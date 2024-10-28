@@ -1,5 +1,5 @@
 import Redis, { RedisOptions } from "ioredis";
-import { logger } from "../lib/utils";
+import { logger } from "../monitoring/logger";
 
 export function startRedis(configOptions: RedisOptions) {
     const redis = new Redis(configOptions);

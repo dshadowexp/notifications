@@ -4,7 +4,8 @@ import config from '../config';
 export const QUEUE_NAMES = {
     PUSH: 'push-notifications',
     EMAIL: 'email-notifications',
-    SMS: 'sms-notifications'
+    SMS: 'sms-notifications',
+    WHATSAPP: 'whatsapp-notifications'
 } as const;
 
 const REDIS_QUEUE_CONFIG = {

@@ -1,6 +1,8 @@
 import { NotificationProvider } from "./base";
 import { createTransport, Transporter } from "nodemailer";
 import { NotificationPayload, NotificationResponse } from "../types/notifications";
+import { ValidationError } from "../lib/errors";
+import { validateMailerPayload } from "../validations/providers";
 
 interface TransportConfig {
     service?: string, 
@@ -31,7 +33,7 @@ export class MailerProvider extends NotificationProvider {
     private transporter: Transporter | undefined;
 
     constructor(config: MailerConfig) {
-        super(config);
+        super('mailer', config);
     }
 
     async initialize(): Promise<void> {
@@ -42,19 +44,17 @@ export class MailerProvider extends NotificationProvider {
         }
     }
 
-    validatePayload(payload: NotificationPayload): boolean {
-        if (!payload.to) return false;
-        // Add email validation
-        if (!payload.title) return false;
-        if (!payload.body) return false;
-        return true;
+    validatePayload(payload: NotificationPayload) {
+        const { error } = validateMailerPayload(payload);
+
+        if (error) {
+            throw new ValidationError(error.details[0].message);
+        }
     }
 
     async send(payload: NotificationPayload): Promise<NotificationResponse> {
         try {
-            if (!this.validatePayload(payload)) {
-                throw new Error('Invalid payload');
-            }
+            this.validatePayload(payload);
 
             const mailOptions = {
                 from: this.config.sender,

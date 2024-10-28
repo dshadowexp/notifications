@@ -27,4 +27,5 @@ export interface NotificationUserData {
     email: string  | null;
     phone_number: string  | null;
     device_token: string  | null;
+    whatsapp: string | null;
 }

@@ -2,24 +2,27 @@ import { Queue, Worker, Job, QueueEvents, Metrics, MetricsTime } from 'bullmq';
 import { QueueJobData } from '../types/notifications';
 import { NotificationProvider } from '../providers/base';
 import { DEFAULT_QUEUE_CONFIG } from './config';
-import { logger } from '../lib/utils';
+import { logger } from '../monitoring/logger';
+import { NotificationMetrics } from '../monitoring/metrics';
 
 export abstract class NotificationQueue {
     protected queue: Queue;
     protected events: QueueEvents;
     protected worker: Worker | undefined;
-    protected provider: NotificationProvider | undefined;
+    protected metrics: NotificationMetrics;
 
     constructor(
         protected readonly queueName: string,
-        protected readonly concurrency: number = 10
+        protected readonly concurrency: number = 10,
+        protected provider: NotificationProvider,
     ) {
         this.queue = new Queue(queueName, DEFAULT_QUEUE_CONFIG);
         this.events = new QueueEvents(queueName, DEFAULT_QUEUE_CONFIG);
+        this.metrics = new NotificationMetrics(queueName, this.provider.name);
     }
 
     private async intializeProvider(): Promise<void> {
-        await this.provider!.initialize();
+        await this.provider.initialize();
     }
 
     async initialize(): Promise<void> {
@@ -38,6 +41,14 @@ export abstract class NotificationQueue {
         );
 
         this.setupWorkerEvents();
+
+        // Set up periodic queue size monitoring
+        setInterval(async () => {
+            const jobCounts = await this.queue.getJobCounts();
+            this.metrics.setJobsInQueue(jobCounts.waiting, 'waiting');
+            this.metrics.setJobsInQueue(jobCounts.active, 'active');
+            this.metrics.setJobsInQueue(jobCounts.delayed, 'delayed');
+        }, 5000);
 
         logger().info(`${this.queueName} queue has been initialized`);
     }
@@ -71,22 +82,43 @@ export abstract class NotificationQueue {
     }
 
     protected async processJob(job: Job<QueueJobData>): Promise<void> {
+        const startTime = Date.now();
+        const waitTime = (startTime - job.timestamp) / 1000;
+        
+        this.metrics.observeQueueLatency(
+            job.data.metadata?.priority || 0,
+            waitTime
+        );
+
         try {
+            const providerStartTime = Date.now();
             const result = await this.provider!.send(job.data.payload);
+            const providerDuration = (Date.now() - providerStartTime) / 1000;
+
+            this.metrics.observeProviderLatency(providerDuration);
             
             if (!result.success) {
+                this.metrics.incrementProviderRequests('failure');
+
                 throw new Error(result.error || 'Notification failed');
             }
 
+            this.metrics.incrementProviderRequests('success');
+
             await job.updateProgress(100);
+
+            const processingDuration = (Date.now() - startTime) / 1000;
+            this.metrics.observeJobProcessingDuration(processingDuration);
+            this.metrics.incrementJobsProcessed('success');
         } catch (error) {
             await job.updateProgress(0);
+
+            this.metrics.incrementJobsFailed(
+                error instanceof Error ? error.constructor.name : 'UnknownError'
+            );
+
             throw error;
         }
-    }
-
-    async metrics(type: 'completed' | 'failed', start=0, end=-1): Promise<Metrics> {
-        return await this.queue.getMetrics(type, start, end);
     }
 
     async pause(): Promise<void> {

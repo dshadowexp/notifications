@@ -1,6 +1,7 @@
+import { ValidationError } from '../../../src/lib/errors';
 import { TwilioProvider } from '../../../src/providers/twilio';
 import { NotificationPayload } from '../../../src/types/notifications';
-import twilio, { Twilio } from 'twilio';
+import twilio from 'twilio';
 
 // Mock twilio
 // Create proper mock type
@@ -32,7 +33,7 @@ describe('TwilioProvider', () => {
     const mockConfig = {
         accountSid: 'test-account-sid',
         authToken: 'test-auth-token',
-        fromNumber: '+1234567890'
+        smsFromNumber: '+1234567890'
     };
 
     beforeEach(() => {
@@ -77,7 +78,7 @@ describe('TwilioProvider', () => {
                 body: 'Test message'
             };
 
-            expect(provider.validatePayload(payload)).toBe(true);
+            expect(provider.validatePayload(payload)).toBe(undefined);
         });
 
         it('should return false when "to" is missing', () => {
@@ -85,7 +86,8 @@ describe('TwilioProvider', () => {
                 body: 'Test message'
             } as NotificationPayload;
 
-            expect(provider.validatePayload(payload)).toBe(false);
+            expect(() => provider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => provider.validatePayload(payload)).toThrow('\"to\" is required');
         });
 
         it('should return false when "body" is missing', () => {
@@ -93,7 +95,8 @@ describe('TwilioProvider', () => {
                 to: '+1234567890'
             } as NotificationPayload;
 
-            expect(provider.validatePayload(payload)).toBe(false);
+            expect(() => provider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => provider.validatePayload(payload)).toThrow('\"body\" is required');
         });
     });
 
@@ -120,7 +123,7 @@ describe('TwilioProvider', () => {
             expect(mockTwilioClient.messages.create).toHaveBeenCalledWith({
                 to: validPayload.to,
                 body: validPayload.body,
-                from: mockConfig.fromNumber
+                from: mockConfig.smsFromNumber
             });
         });
 

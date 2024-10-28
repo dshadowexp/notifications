@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
 import { FirebaseMessagingProvider } from "../../../src/providers/firebase";
 import { NotificationPayload } from '../../../src/types/notifications';
+import { ValidationError } from '../../../src/lib/errors';
 
 jest.mock('firebase-admin', () => ({
     initializeApp: jest.fn(),
@@ -11,6 +12,8 @@ jest.mock('firebase-admin', () => ({
 }));
 
 describe('FirebaseMessagingProvider - Unit Tests', () => {
+    
+
     let firebaseProvider: FirebaseMessagingProvider;
 
     const mockMessaging = {
@@ -25,7 +28,6 @@ describe('FirebaseMessagingProvider - Unit Tests', () => {
     };
   
     beforeEach(async () => {
-        jest.clearAllMocks();
         (admin.initializeApp as jest.Mock).mockReturnValue({
             messaging: () => mockMessaging
         });
@@ -67,7 +69,7 @@ describe('FirebaseMessagingProvider - Unit Tests', () => {
                 data: { key: 'value' }
             };
         
-            expect(firebaseProvider.validatePayload(payload)).toBe(true);
+            expect(firebaseProvider.validatePayload(payload)).toBe(undefined);
         });
     
         it('should return false when "to" is missing', () => {
@@ -76,7 +78,8 @@ describe('FirebaseMessagingProvider - Unit Tests', () => {
                 body: 'Test Body'
             } as NotificationPayload;
         
-            expect(firebaseProvider.validatePayload(payload)).toBe(false);
+            expect(() => firebaseProvider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => firebaseProvider.validatePayload(payload)).toThrow('\"to\" is required');
         });
     
         it('should return false when "body" is missing', () => {
@@ -85,7 +88,8 @@ describe('FirebaseMessagingProvider - Unit Tests', () => {
                 title: 'Test Title'
             } as NotificationPayload;
         
-            expect(firebaseProvider.validatePayload(payload)).toBe(false);
+            expect(() => firebaseProvider.validatePayload(payload)).toThrow(ValidationError);
+            expect(() => firebaseProvider.validatePayload(payload)).toThrow('\"body\" is required');
         });
     });
 

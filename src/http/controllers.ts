@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { 
     validateSendNotificationRequest, 
     validateUpdateDeviceTokenRequest
-} from "../lib/validations";
+} from "../validations/requests";
 import { UserDataRepository } from "../repository/userData";
 import { KafkaClient, KafkaProducer } from "@tuller/lib";
 import { KafkaTopics } from "../config";
+import { metricsRegistry } from "../monitoring/metrics";
+import { logger } from "../monitoring/logger";
 
 const userDataRepository = new UserDataRepository();
 
@@ -57,3 +59,14 @@ export const updateDeviceToken = async (req: Request, res: Response): Promise<Re
     // Return a 200 OK response with a success message
     return res.status(200).send({ success: true, message: 'user info updated' });
 }   
+
+// API middleware to expose metrics endpoint
+export const metricsEndPoint = async (req: Request, res: Response) => {
+    try {
+        res.set('Content-Type', metricsRegistry.contentType);
+        res.end(await metricsRegistry.metrics());
+    } catch (error) {
+        logger().error('Error generating metrics:', error);
+        res.status(500).end();
+    }
+};

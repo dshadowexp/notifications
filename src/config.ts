@@ -24,7 +24,7 @@ class Config {
 
     constructor() {
         this.APP_ID = process.env.APP_ID || '';
-        this.API_PORT = parseInt(process.env.API_PORT || '');
+        this.API_PORT = parseInt(process.env.API_PORT || '3000');
         this.GATEWAY_URL = process.env.GATEWAY_URL || '';
         this.GATEWAY_JWT_SECRET = process.env.GATEWAY_JWT_SECRET || '';
         this.KAFKA_BROKER = process.env.KAFKA_BROKER || '';
@@ -37,7 +37,7 @@ class Config {
         this.MAILER_NAME = process.env.MAILER_NAME || '';
         this.FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || '';
         this.FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL || '';
-        this.FIREBASE_PRIVATE_KEY = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n') || '';
+        this.FIREBASE_PRIVATE_KEY = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
         this.TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
         this.TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
         this.TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
@@ -52,6 +52,11 @@ const config: Config = new Config();
 
 export default config;
 
+export const metricsConfig = {
+    enabled: true,
+    interval: 5000,
+    endpoint: '/metrics'
+};
 export const redisConnectionOptions = { 
     port: config.REDIS_PORT, // Redis port
     host: config.REDIS_URI,
@@ -76,10 +81,15 @@ export const firebaseOptions = {
     clientEmail: config.FIREBASE_CLIENT_EMAIL,
     privateKey: config.FIREBASE_PRIVATE_KEY
 };
-export const twilioOptions = {
+export const smsTwilioOptions = {
     accountSid: config.TWILIO_ACCOUNT_SID,
     authToken: config.TWILIO_AUTH_TOKEN,
-    fromNumber: config.TWILIO_PHONE_NUMBER,
+    smsFromNumber: config.TWILIO_PHONE_NUMBER,
+}
+export const whatsappTwilioOptions = {
+    accountSid: config.TWILIO_ACCOUNT_SID,
+    authToken: config.TWILIO_AUTH_TOKEN,
+    whatsappFromNumber: config.TWILIO_WHATSAPP_NUMBER,
 }
 
 export enum KafkaTopics {

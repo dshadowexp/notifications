@@ -4,7 +4,6 @@ import { MailerConfig, MailerProvider } from '../providers/mailer';
 
 export class EmailQueue extends NotificationQueue {
     constructor(mailerConfig: MailerConfig, concurrency?: number) {
-        super(QUEUE_NAMES.EMAIL, concurrency);
-        this.provider = new MailerProvider(mailerConfig);
+        super(QUEUE_NAMES.EMAIL, concurrency, new MailerProvider(mailerConfig));
     }
 }
