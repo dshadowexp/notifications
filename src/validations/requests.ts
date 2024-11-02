@@ -16,8 +16,16 @@ export const validateSendNotificationRequest = (payload: object): ValidationResu
             priority: Joi.number().optional(),
         }).required(),
         user: Joi.object({
-            id: Joi.string().required()
-        }).required(),
+            native: Joi.object({
+                id: Joi.string().required()
+            }).optional(),
+            foreign: Joi.object({
+                name: Joi.string().optional(),
+                email: Joi.string().email().optional(),
+                phone_number: Joi.string().optional(),
+                whatsapp: Joi.string().optional() 
+            })
+        }),
         channels: Joi.object({
             email: Joi.object({
                     subject: Joi.string().required(),

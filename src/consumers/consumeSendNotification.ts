@@ -1,6 +1,6 @@
 import { logger } from "../monitoring/logger";
 import { KafkaTopics } from "../config";
-import { NotificationMessage } from "../types/messages";
+import { MessageUser, NotificationMessage } from "../types/messages";
 import { IdempotencyService } from "../services/idempotency";
 import { NotificationQueueManager } from "../queues/manager";
 import { UserDataRepository } from "../repository/userData";
@@ -59,15 +59,17 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 return;
             }
 
-            const { id } = notification.user;
-            const userNotificationData = await this.userDataRepository.findByUid(id);
+            const recipient = await this.processRecipient(notification.user);
 
-            if (!userNotificationData) {
-                logger().info(`User with id: ${id} does not exist`);
+            if (!recipient) {
+                logger().info(`Failed to process recipient`);
                 return;
             }
-
-            const { uid, name, email, phone_number, device_token, whatsapp } = userNotificationData;
+        
+            const { 
+                uid, name, email, 
+                phone_number, device_token, whatsapp 
+            } = recipient;
 
             await Promise.all(
                 activeChannels.map(async (channel) => {
@@ -113,6 +115,30 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
         return channels;
     }
 
+    private async processRecipient(
+        user: MessageUser
+    ): Promise<any> {
+        const { native, foreign } = user;
+
+        if (native) {
+            const { id } = native;
+            const userNotificationData = await this.userDataRepository.findByUid(id);
+
+            if (!userNotificationData) {
+                logger().info(`User with id: ${id} does not exist`);
+                return null;
+            }
+
+            const { uid, name, email, phone_number, device_token, whatsapp } = userNotificationData;
+            return { uid, name, email, phone_number, device_token, whatsapp };
+        }
+
+        if (foreign) {
+            const { name, email, phone_number, whatsapp } = foreign;
+            return { name, email, phone_number, whatsapp };
+        }
+    }
+
     private async processChannel(
         channel: string,
         notification: NotificationMessage,
@@ -143,7 +169,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 },
                 metadata: {
                     messageId: notification.metadata.messageId,
-                    userId: notification.user.id,
+                    userId: notification.user.native?.id || userData.email,
                     priority: notification.metadata.priority,
                     timestamp: Date.now()
                 }
@@ -160,7 +186,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 },
                 metadata: {
                     messageId: notification.metadata.messageId,
-                    userId: notification.user.id,
+                    userId: notification.user.native?.id || userData.phone_number,
                     priority: notification.metadata.priority,
                     timestamp: Date.now()
                 }
@@ -179,7 +205,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 },
                 metadata: {
                     messageId: notification.metadata.messageId,
-                    userId: notification.user.id,
+                    userId: notification.user.native?.id || userData.device_token,
                     priority: notification.metadata.priority,
                     timestamp: Date.now()
                 }
@@ -196,7 +222,7 @@ export class SendNotificationConsumer extends KafkaMessageProcessor {
                 },
                 metadata: {
                     messageId: notification.metadata.messageId,
-                    userId: notification.user.id,
+                    userId: notification.user.native?.id || userData.whatsapp,
                     priority: notification.metadata.priority,
                     timestamp: Date.now()
                 }

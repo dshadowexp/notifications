@@ -4,8 +4,20 @@ export interface MessageMetadata {
     priority?: number;
 }
 
-export interface MessageUser {
+export interface NativeMessageUser {
     id: string
+}
+
+export interface ForeignMessageUser {
+    name?: string,
+    email?: string, 
+    phone_number?: string, 
+    whatsapp?: string
+}
+
+export interface MessageUser {
+    native?: NativeMessageUser,
+    foreign?: ForeignMessageUser
 }
 
 export interface EmailMessage {

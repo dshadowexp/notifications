@@ -12,5 +12,7 @@ export function startRedis(configOptions: RedisOptions) {
         logger().error("Redis error connecting:", error.message);
     })
 
+    redis.setMaxListeners(0);
+
     return redis;
 }

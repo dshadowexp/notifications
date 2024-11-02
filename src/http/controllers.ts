@@ -31,7 +31,7 @@ export const sendNotification = async (req: Request, res: Response): Promise<Res
     await kafkaProducer.sendMessage(KafkaTopics.SEND_NOTIFICATION, value);
 
     // Return a 201 Created response with a success message
-    return res.status(201).send({ success: true, message: `notification queued` });
+    return res.status(200).send({ success: true, message: `notification queued` });
 }
 
 /**

@@ -18,7 +18,9 @@ export abstract class NotificationQueue {
     ) {
         this.queue = new Queue(queueName, DEFAULT_QUEUE_CONFIG);
         this.events = new QueueEvents(queueName, DEFAULT_QUEUE_CONFIG);
-        this.metrics = new NotificationMetrics(queueName, this.provider.name);
+        this.metrics = NotificationMetrics.getInstance(queueName, this.provider.name);
+        this.queue.setMaxListeners(0);
+        this.events.setMaxListeners(0);
     }
 
     private async intializeProvider(): Promise<void> {

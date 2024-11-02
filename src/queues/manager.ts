@@ -1,3 +1,4 @@
+import EventEmitter from 'node:events';
 import { Job } from 'bullmq';
 import { PushQueue } from './push';
 import { EmailQueue } from './email';
@@ -6,7 +7,9 @@ import { WhatsAppQueue } from './whatsapp';
 import { QueueJobData } from '../types/notifications';
 
 
+
 export class NotificationQueueManager {
+    private eventEmitter: EventEmitter;
     private pushQueue?: PushQueue;
     private emailQueue?: EmailQueue;
     private smsQueue?: SMSQueue;
@@ -19,7 +22,10 @@ export class NotificationQueueManager {
             sms?: any;
             whatsapp?: any;
         }
-    ) {}
+    ) {
+        this.eventEmitter = new EventEmitter();
+        this.eventEmitter.setMaxListeners(20);
+    }
 
     async initialize(): Promise<void> {
         if (this.config.push) {
@@ -79,5 +85,7 @@ export class NotificationQueueManager {
             this.smsQueue?.close(),
             this.whatsappQueue?.close(),
         ]);
+
+        this.eventEmitter.removeAllListeners();
     }
 }
